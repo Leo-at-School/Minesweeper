@@ -97,7 +97,7 @@ public boolean containsCoord(int[][] coordList, int col, int row){
 
 public class MSButton{
   private int myRow, myCol;
-  private float x,y, width, height;
+  private float x, y, width, height;
   private boolean clicked, flagged;
   private String myLabel;
   
@@ -132,7 +132,7 @@ public class MSButton{
     } else {
       for (int j = myRow - 1; j < myRow + 2; j++){
         for (int i = myCol - 1; i < myCol + 2; i++){
-          if (isValid(i, j) && (i != myRow && j != myCol)){
+          if (isValid(i, j) && (i != myCol && j != myRow)){
             buttons[j][i].mousePressed();
           }
         }
