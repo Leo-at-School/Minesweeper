@@ -3,7 +3,7 @@ import de.bezier.guido.*;
 private int NUM_ROWS = 10;
 private int NUM_COLS = 10;
 private int NUM_MINES = 17;
-private boolean firstClick;
+private boolean firstClick, lost;
 private MSButton[][] buttons; //2d array of minesweeper buttons
 private ArrayList <MSButton> mines; //ArrayList of just the minesweeper buttons that are mined
 
@@ -15,9 +15,10 @@ void setup (){
   Interactive.make(this);
   
   mines = new ArrayList<MSButton>();
-  firstClick = true;
-  
   buttons = new MSButton[NUM_ROWS][NUM_COLS];
+  firstClick = true;
+  lost = false;
+  
   for (int j = 0; j < buttons.length; j++){
     for (int i = 0; i < buttons[0].length; i++){
       buttons[j][i] = new MSButton(i, j);
@@ -26,9 +27,11 @@ void setup (){
 }
 
 public void setMines(int startingCol, int startingRow){
+  firstClick = false;
+  
   MSButton randMine;
   int randRow, randCol;
-  int[][] usedCoordinates = new int[NUM_MINES + 10][2];
+  int[][] usedCoordinates = new int[NUM_MINES + 9][2];
   
   int iteration = 0;
   for (int j = 0; j < 3; j++){
@@ -39,19 +42,24 @@ public void setMines(int startingCol, int startingRow){
     }
   }
   
-  for (int i = 9; i < NUM_MINES + 9; i++){
-    randRow = (int)(Math.random()*NUM_ROWS);
+  for (int i = 0; i < NUM_MINES; i++){
     randCol = (int)(Math.random()*NUM_COLS);
+    randRow = (int)(Math.random()*NUM_ROWS);
     
     while (containsCoord(usedCoordinates, randCol, randRow)){
+      System.out.println("Inside loop: " + randCol + ", " + randRow + ": " + containsCoord(usedCoordinates, randCol, randRow));
       randCol = (int)(Math.random()*NUM_COLS);
       randRow = (int)(Math.random()*NUM_ROWS);
     }
-    usedCoordinates[i][0] = randCol;
-    usedCoordinates[i][1] = randRow;
-    randMine = new MSButton(randRow, randCol);
+    
+    System.out.println("Outside loop: " + randCol + ", " + randRow + ": " + containsCoord(usedCoordinates, randCol, randRow));
+    
+    usedCoordinates[9 + i][0] = randCol;
+    usedCoordinates[9 + i][1] = randRow;
+    randMine = new MSButton(randCol, randRow);
     
     mines.add(randMine);
+    System.out.println();
   }
 }
 
@@ -82,13 +90,19 @@ public void keyPressed(){
 }
 
 public void displayLosingMessage(){
+  lost = true;
   //Doesn't properly work because guido wants to be difficult and not let me remove its buttons
   //fill(0);
   //rect(0, 0, width, height);
   //stroke(255);
   //fill(255);
   //text("YOU LOST!", width/2, height/2);
-  System.out.println("YOU LOST!");
+  
+  for (int i = 0; i < mines.size(); i++){
+    mines.get(i).draw();
+  }
+  
+  System.out.println("YOU LOST!"); 
   noLoop();
 }
 
@@ -166,7 +180,6 @@ public class MSButton{
     
     if (firstClick){
       setMines(myCol, myRow);
-      firstClick = false;
     }
     
     if (mines.contains(this)){
@@ -203,6 +216,9 @@ public class MSButton{
         rect(x, y, width, height);
         fill(0);
         text(myLabel, x + width/2, y + height/2);
+    } else if (lost && mines.contains(this)){
+        fill(255, 0, 0);
+        rect(x, y, width, height);
     } else {
         fill(100);
         rect(x, y, width, height);
@@ -234,6 +250,22 @@ public class MSButton{
   
   public int getMyRow(){
     return myRow;
+  }
+  
+  public float getX(){
+    return x;
+  }
+  
+  public float getY(){
+    return y;
+  }
+  
+  public float getMyWidth(){
+    return width;
+  }
+  
+  public float getMyHeight(){
+    return height;
   }
   
   public String toString(){
