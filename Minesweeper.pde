@@ -1,8 +1,8 @@
 import de.bezier.guido.*;
 
-private int NUM_ROWS = 10;
-private int NUM_COLS = 10;
-private int NUM_MINES = 17;
+private int NUM_ROWS = 5;
+private int NUM_COLS = 5;
+private int NUM_MINES = 7;
 private boolean firstClick, lost;
 private MSButton[][] buttons; //2d array of minesweeper buttons
 private ArrayList <MSButton> mines; //ArrayList of just the minesweeper buttons that are mined
@@ -47,12 +47,9 @@ public void setMines(int startingCol, int startingRow){
     randRow = (int)(Math.random()*NUM_ROWS);
     
     while (containsCoord(usedCoordinates, randCol, randRow)){
-      System.out.println("Inside loop: " + randCol + ", " + randRow + ": " + containsCoord(usedCoordinates, randCol, randRow));
       randCol = (int)(Math.random()*NUM_COLS);
       randRow = (int)(Math.random()*NUM_ROWS);
     }
-    
-    System.out.println("Outside loop: " + randCol + ", " + randRow + ": " + containsCoord(usedCoordinates, randCol, randRow));
     
     usedCoordinates[9 + i][0] = randCol;
     usedCoordinates[9 + i][1] = randRow;
@@ -64,7 +61,7 @@ public void setMines(int startingCol, int startingRow){
 }
 
 public void draw(){
-  background(0);
+  background(0);   
   if(isWon() == true){
     displayWinningMessage();
   }
@@ -113,7 +110,7 @@ public void displayWinningMessage(){
   //stroke(255);
   //fill(255);
   //text("YOU WON!", width/2, height/2);
-  //System.out.println("YOU WON!");
+  System.out.println("YOU WON!");
   noLoop();
 }
 
@@ -178,6 +175,10 @@ public class MSButton{
       return;
     }
     
+    //if (flagged){
+    //  return;
+    //}
+    
     if (firstClick){
       setMines(myCol, myRow);
     }
@@ -209,7 +210,7 @@ public class MSButton{
   public void draw(){    
     if (flagged){
         fill(0);
-        rect(x, y, 0.1, 0.1);
+        rect(x, y, width, height);
         text(myLabel, x + width, y + height);
     } else if (clicked){
         fill(200);
@@ -225,7 +226,6 @@ public class MSButton{
         fill(0);
         text(myLabel, x + width/2, y + height/2);
     }
-    
   }
   
   public void setLabel(String newLabel){
