@@ -3,7 +3,7 @@ import de.bezier.guido.*;
 private int NUM_ROWS = 5;
 private int NUM_COLS = 5;
 private int NUM_MINES = 7;
-private boolean firstClick, lost;
+private boolean firstClick, won, lost;
 private MSButton[][] buttons; //2d array of minesweeper buttons
 private ArrayList <MSButton> mines; //ArrayList of just the minesweeper buttons that are mined
 
@@ -18,6 +18,7 @@ void setup (){
   buttons = new MSButton[NUM_ROWS][NUM_COLS];
   firstClick = true;
   lost = false;
+  won = false;
   
   for (int j = 0; j < buttons.length; j++){
     for (int i = 0; i < buttons[0].length; i++){
@@ -75,7 +76,6 @@ public boolean isWon(){
       }
     }
   }
-  
   return true;
 }
 
@@ -89,11 +89,6 @@ public void keyPressed(){
 public void displayLosingMessage(){
   lost = true;
   //Doesn't properly work because guido wants to be difficult and not let me remove its buttons
-  //fill(0);
-  //rect(0, 0, width, height);
-  //stroke(255);
-  //fill(255);
-  //text("YOU LOST!", width/2, height/2);
   
   for (int i = 0; i < mines.size(); i++){
     mines.get(i).draw();
@@ -104,6 +99,7 @@ public void displayLosingMessage(){
 }
 
 public void displayWinningMessage(){
+  won = true;
   //Doesn't properly work because guido wants to be difficult and not let me remove its buttons
   //fill(0);
   //rect(0, 0, width, height);
@@ -175,9 +171,9 @@ public class MSButton{
       return;
     }
     
-    //if (flagged){
-    //  return;
-    //}
+    if (flagged){
+      return;
+    }
     
     if (firstClick){
       setMines(myCol, myRow);
