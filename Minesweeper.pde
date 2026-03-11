@@ -13,7 +13,6 @@ void setup (){
   
   // make the manager
   Interactive.make(this);
-  Interactive.activate();
   
   mines = new ArrayList<MSButton>();
   buttons = new MSButton[NUM_ROWS][NUM_COLS];
@@ -103,6 +102,7 @@ public void displayLosingMessage(){
   text("YOU LOST!", width/2, height/2);
   //System.out.println("YOU LOST!"); 
   noLoop();
+  Interactive.activate(); //Reenable the GUIDO interface
 }
 
 public void displayWinningMessage(){
@@ -116,6 +116,7 @@ public void displayWinningMessage(){
   text("YOU WON!", width/2, height/2);
   //System.out.println("YOU WON!");
   noLoop();
+  Interactive.activate(); //Reenable the GUIDO interface
 }
 
 public boolean isValid(int c, int r){
