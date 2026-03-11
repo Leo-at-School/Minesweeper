@@ -13,6 +13,7 @@ void setup (){
   
   // make the manager
   Interactive.make(this);
+  Interactive.activate();
   
   mines = new ArrayList<MSButton>();
   buttons = new MSButton[NUM_ROWS][NUM_COLS];
@@ -88,25 +89,33 @@ public void keyPressed(){
 
 public void displayLosingMessage(){
   lost = true;
-  //Doesn't properly work because guido wants to be difficult and not let me remove its buttons
+
+  //Make all the mines turn red on a loss
+  //for (int i = 0; i < mines.size(); i++){
+  //  mines.get(i).draw();
+  //}
+
   
-  for (int i = 0; i < mines.size(); i++){
-    mines.get(i).draw();
-  }
-  
-  System.out.println("YOU LOST!"); 
+  Interactive.deactivate(); //Disable the GUIDO interface to allow drawing on top of the GUIDO interface
+  fill(0);
+  rect(0, 0, width, height);
+  stroke(255);
+  fill(255);
+  text("YOU LOST!", width/2, height/2);
+  //System.out.println("YOU LOST!"); 
   noLoop();
 }
 
 public void displayWinningMessage(){
   won = true;
-  //Doesn't properly work because guido wants to be difficult and not let me remove its buttons
-  //fill(0);
-  //rect(0, 0, width, height);
-  //stroke(255);
-  //fill(255);
-  //text("YOU WON!", width/2, height/2);
-  System.out.println("YOU WON!");
+
+  Interactive.deactivate(); //Disable the GUIDO interface to allow drawing on top of the GUIDO interface
+  fill(0);
+  rect(0, 0, width, height);
+  stroke(255);
+  fill(255);
+  text("YOU WON!", width/2, height/2);
+  //System.out.println("YOU WON!");
   noLoop();
 }
 
