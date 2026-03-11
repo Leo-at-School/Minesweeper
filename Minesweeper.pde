@@ -58,7 +58,6 @@ public void setMines(int startingCol, int startingRow){
     randMine = new MSButton(randCol, randRow);
     
     mines.add(randMine);
-    System.out.println();
   }
 }
 
