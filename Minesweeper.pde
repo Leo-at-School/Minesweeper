@@ -1,24 +1,26 @@
 import de.bezier.guido.*;
 
-private int NUM_ROWS = 5;
-private int NUM_COLS = 5;
-private int NUM_MINES = 7;
-private boolean firstClick, won, lost;
+private int NUM_ROWS = 20;
+private int NUM_COLS = 20;
+private int NUM_MINES = 80;
+private boolean firstClick;
 private MSButton[][] buttons; //2d array of minesweeper buttons
 private ArrayList <MSButton> mines; //ArrayList of just the minesweeper buttons that are mined
 
 void setup (){
   size(400, 400);
+  background(0);
+  stroke(0);
+  fill(0);
   textAlign(CENTER,CENTER);
   
   // make the manager
+  Interactive.activate(); //Reenable the GUIDO interface (if needed)
   Interactive.make(this);
   
   mines = new ArrayList<MSButton>();
   buttons = new MSButton[NUM_ROWS][NUM_COLS];
   firstClick = true;
-  lost = false;
-  won = false;
   
   for (int j = 0; j < buttons.length; j++){
     for (int i = 0; i < buttons[0].length; i++){
@@ -61,7 +63,7 @@ public void setMines(int startingCol, int startingRow){
 }
 
 public void draw(){
-  background(0);   
+  background(0);
   if(isWon() == true){
     displayWinningMessage();
   }
@@ -86,37 +88,23 @@ public void keyPressed(){
 }
 
 public void displayLosingMessage(){
-  lost = true;
-
-  //Make all the mines turn red on a loss
-  //for (int i = 0; i < mines.size(); i++){
-  //  mines.get(i).draw();
-  //}
-
-  
   Interactive.deactivate(); //Disable the GUIDO interface to allow drawing on top of the GUIDO interface
-  fill(0);
-  rect(0, 0, width, height);
+  background(0);
   stroke(255);
   fill(255);
   text("YOU LOST!", width/2, height/2);
   //System.out.println("YOU LOST!"); 
   noLoop();
-  Interactive.activate(); //Reenable the GUIDO interface
 }
 
 public void displayWinningMessage(){
-  won = true;
-
   Interactive.deactivate(); //Disable the GUIDO interface to allow drawing on top of the GUIDO interface
-  fill(0);
-  rect(0, 0, width, height);
+  background(0);
   stroke(255);
   fill(255);
   text("YOU WON!", width/2, height/2);
   //System.out.println("YOU WON!");
   noLoop();
-  Interactive.activate(); //Reenable the GUIDO interface
 }
 
 public boolean isValid(int c, int r){
@@ -222,9 +210,6 @@ public class MSButton{
         rect(x, y, width, height);
         fill(0);
         text(myLabel, x + width/2, y + height/2);
-    } else if (lost && mines.contains(this)){
-        fill(255, 0, 0);
-        rect(x, y, width, height);
     } else {
         fill(100);
         rect(x, y, width, height);
