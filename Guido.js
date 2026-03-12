@@ -1,448 +1,166 @@
-//
-//	Taking a whole hearted stab at including a js lib alongside Java.
-//
-//	fjenett - 2012-04
-//  fjenett 20121219
-//
-
-if ( !Interactive ) {
-var Interactive = (function(){
-
-    // -----------------------------------------
-    //   private variables and functions
-    // -----------------------------------------
-
-    var interactiveInstance;
-
-	// this is taken from processing.js
-	// -------------------------------------
-	var stylePaddingLeft, stylePaddingTop, styleBorderLeft, styleBorderTop;
-	var setStyleValues = function ( curElement ) {
-		if ( document.defaultView && document.defaultView.getComputedStyle ) {
-			var style = document.defaultView.getComputedStyle(curElement, null);
-		    stylePaddingLeft = parseInt( style['paddingLeft'], 10 ) || 0;
-		    stylePaddingTop = parseInt( style['paddingTop'], 10 ) || 0;
-		    styleBorderLeft = parseInt( style['borderLeftWidth'], 10 ) || 0;
-		    styleBorderTop = parseInt( style['borderTopWidth'], 10 ) || 0;
-		}
-	}
-	function calculateOffset(curElement, event) {
-      var element = curElement,
-        offsetX = 0,
-        offsetY = 0;
-
-      // Find element offset
-      if (element.offsetParent) {
-        do {
-          offsetX += element.offsetLeft;
-          offsetY += element.offsetTop;
-        } while (!!(element = element.offsetParent));
+if(!Interactive) {
+  var Interactive = function() {
+    var f, j, k, l, m, n = function(a) {
+      document.defaultView && document.defaultView.getComputedStyle && (a = document.defaultView.getComputedStyle(a, null), j = parseInt(a.paddingLeft, 10) || 0, k = parseInt(a.paddingTop, 10) || 0, l = parseInt(a.borderLeftWidth, 10) || 0, m = parseInt(a.borderTopWidth, 10) || 0)
+    }, p = function(a, b, c) {
+      if("addEventListener" in a) {
+        a.addEventListener(b, c)
+      }else {
+        var i = a["on" + b];
+        a["on" + b] = function(b) {
+          var o = c.apply(b.target, [b]);
+          i && i.apply(a, [b]);
+          return o
+        }
       }
-
-      // Find Scroll offset
-      element = curElement;
-      do {
-        offsetX -= element.scrollLeft || 0;
-        offsetY -= element.scrollTop || 0;
-      } while (!!(element = element.parentNode));
-
-      // Add padding and border style widths to offset
-      offsetX += stylePaddingLeft;
-      offsetY += stylePaddingTop;
-
-      offsetX += styleBorderLeft;
-      offsetY += styleBorderTop;
-
-      // Take into account any scrolling done
-      offsetX += window.pageXOffset;
-      offsetY += window.pageYOffset;
-
-		return {X:offsetX, Y:offsetY};
-    }
-	// -------------------------------------
-
-    // x-browser (?) addEventListener implementation
-    var addEventListenerImpl = function( target, event, callback ) {
-        if ( 'addEventListener' in target ) {
-            target.addEventListener( event, callback );
-        } else {
-            var originalEvent = target["on"+event];
-            target["on"+event] = function ( evt ) {
-                var bubble = callback.apply( evt.target, [evt] );
-                if ( originalEvent ) originalEvent.apply( target, [evt] );
-                return bubble;
-            };
+    }, d = function(a) {
+      this.target = a.target;
+      n(this.target);
+      this.listeners = [];
+      a.papplet && "draw" in a.papplet && (a.papplet.draw = function(b, a, c) {
+        return function() {
+          b.preDraw(a);
+          c();
+          b.postDraw(a)
         }
+      }(this, a.papplet, a.papplet.draw));
+      var a = "mousemove,mousedown,mouseup,click,dblclick,mouseover,mouseout,mouseenter,mouseleave,mousewheel,DOMMouseScroll".split(","), b = {mousemove:"mouseMoved", mousedown:"mousePressed", dblclick:"mouseDoubleClicked", mouseup:"mouseReleased", mousewheel:"mouseScrolled", DOMMouseScroll:"mouseScrolled"}, c;
+      for(c in a) {
+        (function(b, a, c, d) {
+          p(a, c, function(c) {
+            var e, g;
+            e = a;
+            var h = 0;
+            g = 0;
+            if(e.offsetParent) {
+              do {
+                h = h + e.offsetLeft;
+                g = g + e.offsetTop
+              }while(e = e.offsetParent)
+            }
+            e = a;
+            do {
+              h = h - (e.scrollLeft || 0);
+              g = g - (e.scrollTop || 0)
+            }while(e = e.parentNode);
+            h = h + j;
+            g = g + k;
+            h = h + l;
+            g = g + m;
+            h = h + window.pageXOffset;
+            g = g + window.pageYOffset;
+            e = h;
+            for(var f in b.listeners) {
+              if(b.listeners[f].isActive() && d in b.listeners[f]) {
+                if(d == "mouseScrolled") {
+                  b.listeners[f][d](c.detail ? c.detail * -1 : c.wheelDelta / 40, c.pageX - e, c.pageY - g)
+                }else {
+                  b.listeners[f][d](c.pageX - e, c.pageY - g)
+                }
+              }
+            }
+          })
+        })(this, this.target, a[c], b[a[c]])
+      }
+      this.add = function(b) {
+        this.listeners.push(b)
+      };
+      this.preDraw = function() {
+      };
+      this.postDraw = function() {
+        if(this.listeners) {
+          for(var b in this.listeners) {
+            "draw" in this.listeners[b] && this.listeners[b].draw()
+          }
+        }
+      }
     };
-
-    // helper to call one of many possible fns by name on a target
-    var getCallFn = function ( listener, methods ) {
-        for ( var m in methods ) {
-            if ( methods[m] in listener &&
-                typeof listener[methods[m]] === 'function' ) {
-                return listener[methods[m]];
-            }
+    d.make = function(a) {
+      f = new d({target:a.externals.canvas, papplet:a})
+    };
+    d.add = function(a) {
+      f.add(new q(a))
+    };
+    d.setActive = function(a, b) {
+      if(f) {
+        for(var c in f.listeners) {
+          var i = f.listeners[c];
+          i.listener == a && i.setActive(b)
         }
-        return function(){}; // noop
-    }
-
-    // -----------------------------------------
-    //   class Interactive
-    // -----------------------------------------
-
-    var Interactive = function () {
-
-        var opts = arguments[0];
-
-        this.target = opts.target;
-		setStyleValues( this.target );
-
-        this.listeners = [];
-
-		if ( opts.papplet && 'draw' in opts.papplet ) {
-			var drawStored = opts.papplet.draw;
-			opts.papplet.draw = (function(ia,pa,ds){
-				return function(){
-					ia.preDraw(pa);
-					ds.apply(pa);
-					ia.postDraw(pa);
-				};
-			})(this, opts.papplet, drawStored);
-		}
-
-        var events = [
-            "mousemove", "mousedown", "mouseup", "click", "dblclick",
-            "mouseover", "mouseout", "mouseenter", "mouseleave", "mousewheel",
-			"DOMMouseScroll"
-        ];
-        var eventDests = {
-            "mousemove": "mouseMoved",
-            "mousedown": "mousePressed",
-            "dblclick": "mouseDoubleClicked",
-            "mouseup": "mouseReleased",
-			"mousewheel": "mouseScrolled",
-			"DOMMouseScroll": "mouseScrolled"
-        };
-        for ( var e in events ) {
-            (function(manager, target, event, meth){
-                addEventListenerImpl( target, event, function( evt ){
-//                    console.log( event );
-//                    console.log( evt );
-
-					var offset = calculateOffset( target, evt );
-
-                    for ( var l in manager.listeners ) {
-						if ( !( manager.listeners[l].isActive() ) ) continue;
-                        if ( meth in manager.listeners[l] ) {
-							if ( meth == 'mouseScrolled' )
-								manager.listeners[l][meth]( evt.detail ? evt.detail * -1 : evt.wheelDelta / 40,
-									 						evt.pageX - offset.X,
-															evt.pageY - offset.Y );
-							else
-								manager.listeners[l][meth]( evt.pageX - offset.X,
-															evt.pageY - offset.Y );
-						}
-                    }
-                });
-            })(this, this.target, events[e], eventDests[events[e]]);
+      }
+    };
+    d.insideRect = function(a, b, c, i, d, f) {
+      return d >= a && d <= a + c && f >= b && f <= b + i
+    };
+    var q = function(a) {
+      this.listener = a;
+      "isInside" in this.listener || ("x" in this.listener && "y" in this.listener && "width" in this.listener && "height" in this.listener ? this.listener.isInside = function(b, c) {
+        return d.insideRect(this.x, this.y, this.width, this.height, b, c)
+      } : alert("Interactive: listener must implement\npublic boolean isInside (float mx, float my)"));
+      this.pressed = this.dragged = this.hover = !1;
+      this.activated = !0;
+      this.clickedMouseX;
+      this.clickedMouseY;
+      this.clickedPositionX;
+      this.clickedPositionY;
+      this.draggedDistX;
+      this.draggedDistY;
+      this.lastPressed = 0;
+      this.activated = !0;
+      this.mousePressed = function(b, c) {
+        if(this.activated) {
+          if(this.pressed = this.listener.isInside(b, c)) {
+            this.clickedPositionX = this.listener.x;
+            this.clickedPositionY = this.listener.y;
+            this.clickedMouseX = b;
+            this.clickedMouseY = c;
+            "mousePressed" in this.listener && this.listener.mousePressed(b, c)
+          }
         }
-
-        this.add = function( listener ) {
-            this.listeners.push( listener );
+      };
+      this.mouseDoubleClicked = function(b, c) {
+        this.activated && this.listener.isInside(b, c) && "mouseDoubleClicked" in this.listener && this.listener.mouseDoubleClicked(b, c)
+      };
+      this.mouseMoved = function(b, c) {
+        if(this.activated) {
+          if(this.dragged = this.pressed) {
+            this.draggedDistX = this.clickedMouseX - b;
+            this.draggedDistY = this.clickedMouseY - c;
+            "mouseDragged" in this.listener && this.listener.mouseDragged(b, c, this.clickedPositionX - this.draggedDistX, this.clickedPositionY - this.draggedDistY)
+          }else {
+            var a = this.listener.isInside(b, c);
+            !a && this.hover ? "mouseExited" in this.listener && this.listener.mouseExited(b, c) : a && !this.hover ? "mouseEntered" in this.listener && this.listener.mouseEntered(b, c) : a && "mouseMoved" in this.listener && this.listener.mouseMoved(b, c);
+            this.hover = a
+          }
         }
-
-        this.remove = function( listener ) {
-            for ( var i = 0, k = this.listeners.length; i < k; i++ ) {
-                if ( this.listeners[i].listener == listener )
-                    this.listeners.splice( i, 1 );
-            }
+      };
+      this.mouseReleased = function(b, a) {
+        if(this.activated) {
+          if(this.dragged) {
+            this.draggedDistX = this.clickedMouseX - b;
+            this.draggedDistY = this.clickedMouseY - a
+          }
+          this.pressed && "mouseReleased" in this.listener && this.listener.mouseReleased(b, a);
+          this.pressed = this.dragged = false
         }
-
-		this.preDraw = function ( papplet ) {
-			//console.log('pre');
-		}
-
-		this.postDraw = function ( papplet ) {
-			//console.log('post');
-			if ( this.listeners ) {
-				for ( var l in this.listeners ) {
-					if ( 'draw' in this.listeners[l] ) {
-						this.listeners[l].draw( papplet );
-					}
-				}
-			}
-		}
-    }
-
-    // -----------------------------------------
-    //   static
-    // -----------------------------------------
-
-    // Java version has optional 2nd arg "force" that is not needed in JS
-    Interactive.make = function ( targ ) {
-        interactiveInstance = new Interactive({
-          target: targ.externals.canvas,
-          papplet: targ
-        });
-    }
-
-    Interactive.add = function ( oneOrMoreListeners ) {
-        var ae = null;
-        if ( interactiveInstance ) {
-            if ( Object.prototype.toString.call( oneOrMoreListeners ) === '[object Array]' ) {
-                for ( var i = 0, k = oneOrMoreListeners.length; i < k; i++ ) {
-                    interactiveInstance.add( new ActiveElement( oneOrMoreListeners[i] ) );
-                }
-                return null;
-            } else {
-                ae = new ActiveElement( oneOrMoreListeners );
-                interactiveInstance.add( ae );
-            }
+      };
+      this.mouseScrolled = function(b, a, d) {
+        this.activated && this.listener.isInside(a, d) && "mouseScrolled" in this.listener && this.listener.mouseScrolled(b)
+      };
+      this.setActive = function(a) {
+        this.activated = a;
+        this.listener && "setActive" in this.listener && this.listener.setActive(a)
+      };
+      this.isActive = function() {
+        return this.listener && "isActive" in this.listener ? this.listener.isActive() : this.activated
+      };
+      this.draw = function() {
+        if(this.activated && this.listener && "draw" in this.listener) {
+          return this.listener.draw()
         }
-        return ae;
-    }
-
-    Interactive.remove = function ( oneOrMoreListeners ) {
-        var ae = null;
-        if ( interactiveInstance ) {
-            if ( Object.prototype.toString.call( oneOrMoreListeners ) === '[object Array]' ) {
-                for ( var i = 0, k = oneOrMoreListeners.length; i < k; i++ ) {
-                    interactiveInstance.remove( oneOrMoreListeners[i] );
-                }
-                return null;
-            } else {
-                interactiveInstance.remove( oneOrMoreListeners );
-            }
-        }
-        return ae;
-    }
-
-    Interactive.setActive = function ( listener, state ) {
-        if ( interactiveInstance ) {
-			for ( var l in interactiveInstance.listeners ) {
-				var ll = interactiveInstance.listeners[l];
-				if ( ll.listener == listener ) {
-					// console.log( "I.setActive" );
-					ll.setActive( state );
-				}
-			}
-		}
-    }
-
-	Interactive.insideRect = function ( x, y, width, height, mx, my ) {
-		return mx >= x && mx <= x+width && my >= y && my <= y+height;
-	}
-
-    Interactive.on = function () {
-        if ( interactiveInstance ) {
-            var ia = interactiveInstance;
-            if ( !ia.eventBindings ) {
-                ia.eventBindings = [];
-            }
-            var source, event, target, method;
-            if ( arguments.length < 3 ) {
-                throw( "Interactive.on() ... not enough arguments" );
-            } else if (arguments.length == 3 ) {
-                source = null;
-                event = arguments[0];
-                target = arguments[1];
-                method = arguments[2];
-            } else if ( arguments.length == 4) {
-                source = arguments[0];
-                event = arguments[1];
-                target = arguments[2];
-                method = arguments[3];
-            }
-            if ( !target ) {
-                throw( "Interactive.on() ... the target is null" );
-            }
-            if ( !( method in target ) || typeof target[method] !== 'function' ) {
-                throw( "Interactive.on() ... that method does not exist" );
-            }
-            var binding = ia.eventBindings[event];
-            if ( !binding ) {
-                binding = [];
-                ia.eventBindings[event] = binding;
-            }
-            binding.push({
-                callback: function(){
-                    target[method].apply(target, arguments)
-                },
-                source: source
-            });
-        }
-    }
-
-    Interactive.send = function () {
-        if ( interactiveInstance ) {
-            var ia = interactiveInstance;
-            var source, event, args = [];
-            if ( arguments.length < 1 ) {
-                throw( "Interactive.send() ... not enough arguments" );
-            } else if ( typeof arguments[0] === 'object' ) {
-                source = arguments[0];
-                event = arguments[1];
-                for ( var i = 2, k = arguments.length; i < k; i++ ) {
-                    args.push( arguments[i] );
-                }
-            } else {
-                source = null;
-                event = arguments[0];
-                for ( var i = 1, k = arguments.length; i < k; i++ ) {
-                    args.push( arguments[i] );
-                }
-            }
-            var binding = ia.eventBindings[event];
-            if ( binding ) {
-                for ( var i = 0, k = binding.length; i < k; i++ ) {
-                    if ( binding[i] && binding[i].source === source ) {
-                        binding[i].callback.apply(null, args);
-                    }
-                }
-            }
-        }
-    }
-
-    // -----------------------------------------
-    //   class ActiveElement
-    // -----------------------------------------
-
-    var ActiveElement = function () {
-
-        this.listener = arguments[0];
-        if ( !( 'isInside' in this.listener ) ) {
-			if ( ('x' in this.listener) && ('y' in this.listener) &&
-			     ('width' in this.listener) && ('height' in this.listener) ) {
-				this.listener.isInside = function ( mx, my ) {
-					return Interactive.insideRect( this.x, this.y,
-												   this.width, this.height,
-												   mx, my );
-				}
-			} else {
-	        	alert( "Interactive: listener must implement\n" +
-		   			   "\tpublic boolean isInside (float mx, float my)\n" +
-		 			   "or must have fields\n" +
-		  			   "\tfloat x, y, width, height;" );
-			}
-        }
-
-        this.pressed = this.dragged = this.hover = false, this.activated = true;
-        this.clickedMouseX = 0, this.clickedMouseY = 0;
-        this.clickedPositionX = 0, this.clickedPositionY = 0;
-        this.draggedDistX = 0, this.draggedDistY = 0;
-        this.lastPressed = 0;
-		this.activated = true;
-        this.debug = false;
-
-        this.setDebug = function ( tf ) {
-            this.debug = tf ? true : false;
-        }
-
-        this.mousePressed = this.mousePressedAt = function ( mx, my ) {
-            if ( !(this.activated) ) return;
-
-			this.pressed = this.listener.isInside( mx, my );
-
-            if ( this.pressed ) {
-                this.clickedPositionX = this.listener.x;
-                this.clickedPositionY = this.listener.y;
-                this.clickedMouseX = mx;
-                this.clickedMouseY = my;
-                getCallFn( this.listener, ['mousePressed','mousePressedAt'] )( mx, my );
-            }
-        }
-
-        this.mouseDoubleClicked = this.mouseDoubleClickedAt = function ( mx, my ) {
-            if ( !(this.activated) ) return;
-
-            if ( this.listener.isInside( mx, my ) ) {
-                getCallFn( this.listener, ['mouseDoubleClicked','mouseDoubleClickedAt'] )( mx, my );
-            }
-        }
-
-        this.mouseMoved = this.mouseMovedAt = function ( mx, my ) {
-            if ( !(this.activated) ) return;
-
-            this.dragged = this.pressed;
-            if ( this.dragged ) {
-                this.draggedDistX = this.clickedMouseX - mx;
-                this.draggedDistY = this.clickedMouseY - my;
-                getCallFn( this.listener, ['mouseDraggedAt','mouseDraggedFromTo'],
-                            this.listener )( mx, my,
-                    this.clickedPositionX - this.draggedDistX,
-                    this.clickedPositionY - this.draggedDistY );
-            } else {
-                var nowInside = this.listener.isInside( mx, my );
-
-                if ( !nowInside && this.hover ) {
-                    getCallFn( this.listener, ['mouseExited','mouseExitedAt'] )( mx, my );
-                } else if ( nowInside && !this.hover ) {
-                    getCallFn( this.listener, ['mouseEntered','mouseEnteredAt'] )( mx, my );
-                } else if ( nowInside ) {
-                    getCallFn( this.listener, ['mouseMoved','mouseMovedAt'] )( mx, my );
-                }
-
-                this.hover = nowInside;
-            }
-        }
-
-        this.mouseReleased = this.mouseReleasedAt = function ( mx, my ) {
-            if ( !(this.activated) ) return;
-
-            if ( this.dragged ) {
-                this.draggedDistX = this.clickedMouseX - mx;
-                this.draggedDistY = this.clickedMouseY - my;
-            }
-
-            if ( this.pressed ) {
-                getCallFn( this.listener, ['mouseReleased','mouseReleasedAt'] )( mx, my );
-            }
-
-            this.pressed = this.dragged = false;
-        }
-
-		this.mouseScrolled = function ( step, mx, my ) {
-            if ( !(this.activated) ) return;
-			//console.log( step );
-
-			if ( this.listener.isInside( mx, my ) ) {
-				if ( 'mouseScrolled' in this.listener ) {
-					this.listener.mouseScrolled( step );
-					return;
-				}
-			}
-		}
-
-		this.setActive = function ( state ) {
-			this.activated = state;
-			if ( this.listener ) {
-				if ( 'setActive' in this.listener ) {
-					this.listener.setActive( state );
-					return;
-				}
-			}
-		}
-
-		this.isActive = function () {
-			if ( this.listener ) {
-				if ( 'isActive' in this.listener ) {
-					return this.listener.isActive();
-				}
-			}
-			return this.activated;
-		}
-
-		this.draw = function ( papplet ) {
-			if ( !(this.activated) ) return;
-			if ( this.listener ) {
-				if ( 'draw' in this.listener ) {
-					return this.listener.draw( papplet );
-				}
-			}
-		}
-    }
-
-    return Interactive;
-
-})();
-} // check already imported
+      }
+    };
+    return d
+  }()
+}
+;
