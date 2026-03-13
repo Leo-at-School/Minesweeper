@@ -27,6 +27,8 @@ void setup (){
       buttons[j][i] = new MSButton(i, j);
     }
   }
+  
+  System.out.println(getInteractiveMethodNames());
 }
 
 public void setMines(int startingCol, int startingRow){
@@ -261,4 +263,21 @@ public class MSButton{
   public String toString(){
     return "(" + myCol + ", " + myRow + ")";
   }
+}
+
+//For debugging
+public String getInteractiveMethodNames(){
+  java.lang.reflect.Method[] methodList = Interactive.class.getMethods(); //Get references to the public methods in the Interactive class
+  
+  //Shove all the names into one string
+  String names = new String();
+  for (int i = 0; i < methodList.length; i++){
+    if (i == methodList.length - 1){
+      names += methodList[i].toString();
+    } else { 
+      names += methodList[i].toString() + "\n";
+    }
+  }
+  
+  return names;
 }
