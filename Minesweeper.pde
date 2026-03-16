@@ -27,8 +27,6 @@ void setup (){
       buttons[j][i] = new MSButton(i, j);
     }
   }
-  
-  System.out.println(getInteractiveMethodNames());
 }
 
 public void setMines(int startingCol, int startingRow){
