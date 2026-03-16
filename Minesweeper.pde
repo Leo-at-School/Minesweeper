@@ -15,7 +15,7 @@ void setup (){
   textAlign(CENTER,CENTER);
   
   // make the manager
-  Interactive.activate(); //Reenable the GUIDO interface (if needed)
+  //Interactive.activate(); //Reenable the GUIDO interface (if needed)
   Interactive.make(this);
   
   mines = new ArrayList<MSButton>();
@@ -88,7 +88,7 @@ public void keyPressed(){
 }
 
 public void displayLosingMessage(){
-  Interactive.deactivate(); //Disable the GUIDO interface to allow drawing on top of the GUIDO interface
+  //Interactive.deactivate(); //Disable the GUIDO interface to allow drawing on top of the GUIDO interface
   background(0);
   stroke(255);
   fill(255);
@@ -98,7 +98,7 @@ public void displayLosingMessage(){
 }
 
 public void displayWinningMessage(){
-  Interactive.deactivate(); //Disable the GUIDO interface to allow drawing on top of the GUIDO interface
+  //Interactive.deactivate(); //Disable the GUIDO interface to allow drawing on top of the GUIDO interface
   background(0);
   stroke(255);
   fill(255);
