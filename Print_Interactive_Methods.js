@@ -5,8 +5,8 @@ function getProcessingInstance(){
         return
     }
     
-    console.log(pjs.getInteractiveMethodNames());
-    document.getElementById("staticMethodSpan").innerText = pjs.getInteractiveMethodNames();
+    console.log(pjs.InteractiveMethodNames);
+    document.getElementById("staticMethodSpan").innerText = pjs.InteractiveMethodNames;
 }
 
 window.onload = function(){

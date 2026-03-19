@@ -1,14 +1,20 @@
 import de.bezier.guido.*;
 
-private int NUM_ROWS = 20;
-private int NUM_COLS = 20;
-private int NUM_MINES = 80;
+final public String InteractiveMethodNames = getInteractiveMethodNames();
+
+private int NUM_ROWS, NUM_COLS, NUM_MINES;
 private boolean firstClick;
 private MSButton[][] buttons; //2d array of minesweeper buttons
 private ArrayList <MSButton> mines; //ArrayList of just the minesweeper buttons that are mined
 
-void setup (){
+void settings(){
   size(400, 400);
+  NUM_ROWS = 20;
+  NUM_COLS = 20;
+  NUM_MINES = 80;
+}
+
+void setup (){
   background(0);
   stroke(0);
   fill(0);
